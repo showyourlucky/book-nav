@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, TextAreaField, BooleanField, SubmitField, SelectField, HiddenField, IntegerField, PasswordField
+from wtforms import StringField, TextAreaField, BooleanField, SubmitField, SelectField, HiddenField, IntegerField, PasswordField, DateTimeField
 from wtforms.validators import DataRequired, Length, URL, Optional, ValidationError, Email, EqualTo, NumberRange
 from app.models import Category, User
 
@@ -104,6 +104,34 @@ class SiteSettingsForm(FlaskForm):
         ('dark', '暗色主题')
     ], validators=[Optional()])
     transition_color = StringField('主色调', validators=[Optional(), Length(max=32)])
+    
+    # PC端背景设置
+    pc_background_type = SelectField('PC端背景类型', choices=[
+        ('none', '无背景'),
+        ('image', '图片背景'),
+        ('gradient', '渐变色背景'),
+        ('color', '纯色背景')
+    ], validators=[Optional()])
+    pc_background_url = StringField('PC端背景URL', validators=[Optional(), Length(max=512)])
+    pc_background_file = FileField('上传PC端背景图片', validators=[FileAllowed(['jpg', 'png', 'gif', 'webp'], '只允许上传图片!')])
+
+    # 移动端背景设置
+    mobile_background_type = SelectField('移动端背景类型', choices=[
+        ('none', '无背景'),
+        ('image', '图片背景'),
+        ('gradient', '渐变色背景'),
+        ('color', '纯色背景')
+    ], validators=[Optional()])
+    mobile_background_url = StringField('移动端背景URL', validators=[Optional(), Length(max=512)])
+    mobile_background_file = FileField('上传移动端背景图片', validators=[FileAllowed(['jpg', 'png', 'gif', 'webp'], '只允许上传图片!')])
+    
+    # 公告设置
+    announcement_enabled = BooleanField('启用公告')
+    announcement_title = StringField('公告标题', validators=[Optional(), Length(max=128)])
+    announcement_content = TextAreaField('公告内容', validators=[Optional()])
+    announcement_start = DateTimeField('开始时间', validators=[Optional()], format='%Y-%m-%dT%H:%M')
+    announcement_end = DateTimeField('结束时间', validators=[Optional()], format='%Y-%m-%dT%H:%M')
+    announcement_remember_days = IntegerField('不再提示天数', validators=[Optional(), NumberRange(min=1, max=365)], default=7)
     
     submit_btn = SubmitField('保存设置')
 

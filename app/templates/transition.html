@@ -582,7 +582,7 @@
         <!-- 底部选项 -->
         <div class="redirect-footer">
           <div class="redirect-stats">
-            <i class="bi bi-eye eye-icon"></i>访问次数: {{ website.views }}
+            <i class="bi bi-eye eye-icon"></i>访问次数: {{ website.views + 1 }}
           </div>
 
           {% if settings.transition_remember_choice %}
@@ -603,78 +603,96 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-          const targetUrl = "{{ website.url }}";
-          const progressBar = document.getElementById('redirect-progress-bar');
-          const countdown = document.getElementById('countdown');
-          const disableRedirect = document.getElementById('disableRedirect');
-          const redirectNow = document.getElementById('redirect-now');
+        const targetUrl = "{{ website.url }}";
+        const progressBar = document.getElementById('redirect-progress-bar');
+        const countdownEl = document.getElementById('countdown');
+        var disableRedirect = document.getElementById('disableRedirect');
+        const redirectNow = document.getElementById('redirect-now');
+        const rememberChoice = {{ 'true' if settings.transition_remember_choice else 'false' }};
 
-          // 获取倒计时时间
-          let count = {{ countdown }};
+        // 预加载目标网站
+        function preloadTargetSite() {
+            try {
+                // DNS 预解析
+                const dnsLink = document.createElement('link');
+                dnsLink.rel = 'dns-prefetch';
+                dnsLink.href = new URL(targetUrl).origin;
+                document.head.appendChild(dnsLink);
 
-          // 如果用户已经选择不再显示过渡页，直接跳转
-          {% if settings.transition_remember_choice %}
-          if (localStorage.getItem('disableRedirect') === 'true') {
-              window.location.href = targetUrl;
-              return;
-          }
-          {% endif %}
+                // 预加载目标网站
+                const preloadLink = document.createElement('link');
+                preloadLink.rel = 'preload';
+                preloadLink.as = 'document';
+                preloadLink.href = targetUrl;
+                document.head.appendChild(preloadLink);
+            } catch (e) {
+                console.error('预加载失败:', e);
+            }
+        }
 
-          // 确保倒计时大于0，避免除以零错误
-          if ({{ countdown }} <= 0) {
-              console.error('倒计时时间设置为0，直接跳转');
-              window.location.href = targetUrl;
-              return;
-          }
+        // 立即开始预加载
+        preloadTargetSite();
 
-          // 设置倒计时
-          const timer = setInterval(function() {
-              count--;
-              countdown.textContent = count;
-              progressBar.style.width = (({{ countdown }} - count) / {{ countdown }} * 100) + '%';
+        // 获取倒计时时间
+        var totalSeconds = {{ countdown|int }};
+        var start = Date.now();
+        var ended = false;
 
-              if (count <= 0) {
-                  clearInterval(timer);
-                  window.location.href = targetUrl;
-              }
-          }, 1000);
+        // 确保倒计时大于0，避免除以零错误
+        if (totalSeconds <= 0) {
+            console.error('倒计时时间设置为0，直接跳转');
+            window.location.replace(targetUrl);
+            return;
+        }
 
-          // 立即跳转按钮事件
-          if (redirectNow) {
-              redirectNow.addEventListener('click', function() {
-                  clearInterval(timer);
-                  // 保存用户的选择
-                  if (disableRedirect && disableRedirect.checked) {
-                      localStorage.setItem('disableRedirect', 'true');
-                  }
-              });
-          }
+        // 跳转
+        function recordAndJump() {
+            if (ended) return;
+            ended = true;
+            window.location.replace(targetUrl);
+        }
 
-          // 保存用户设置
-          {% if settings.transition_remember_choice %}
-          if (disableRedirect) {
-              disableRedirect.addEventListener('change', function() {
-                  if (this.checked) {
-                      localStorage.setItem('disableRedirect', 'true');
-                  } else {
-                      localStorage.removeItem('disableRedirect');
-                  }
-              });
-          }
-          {% endif %}
+        // 平滑进度条和倒计时
+        function animate() {
+            var elapsed = (Date.now() - start) / 1000;
+            var percent = Math.min((elapsed / totalSeconds) * 100, 100);
+            progressBar.style.width = percent + '%';
+            var remain = Math.ceil(totalSeconds - elapsed);
+            countdownEl.textContent = remain > 0 ? remain : 0;
+            if (elapsed < totalSeconds && !ended) {
+                requestAnimationFrame(animate);
+            } else if (!ended) {
+                recordAndJump();
+            }
+        }
 
-          // 尝试记录访问（如果API存在）
-          try {
-              fetch('/api/record-visit/{{ website.id }}', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRFToken': '{{ csrf_token() }}'
-                  }
-              }).catch(e => console.log('访问记录API不存在或出错'));
-          } catch (e) {
-              console.log('访问记录功能不可用');
-          }
+        // 开始动画
+        animate();
+
+        // 处理"不再显示"复选框
+        if (rememberChoice && disableRedirect) {
+            disableRedirect.addEventListener('change', function() {
+                if (this.checked) {
+                    // 设置cookie，有效期30天
+                    document.cookie = "disableRedirect=true; path=/; max-age=2592000";
+                } else {
+                    // 删除cookie
+                    document.cookie = "disableRedirect=; path=/; max-age=0";
+                }
+            });
+        }
+
+        // 立即跳转按钮事件
+        if (redirectNow) {
+            redirectNow.addEventListener('click', function(e) {
+                e.preventDefault(); // 阻止默认行为
+                ended = true;
+                if (rememberChoice && disableRedirect && disableRedirect.checked) {
+                    document.cookie = "disableRedirect=true; path=/; max-age=2592000";
+                }
+                window.location.replace(targetUrl);
+            });
+        }
       });
     </script>
   </body>

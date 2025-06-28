@@ -684,6 +684,24 @@ def site_settings():
             settings.footer_content = form.footer_content.data
             settings.background_type = form.background_type.data
             
+            # 更新PC端背景设置
+            if form.pc_background_file.data and form.pc_background_type.data == 'image':
+                pc_bg_filename = save_image(form.pc_background_file.data, 'backgrounds')
+                if pc_bg_filename:
+                    settings.pc_background_url = url_for('static', filename=f'uploads/backgrounds/{pc_bg_filename}')
+            elif form.pc_background_url.data:
+                settings.pc_background_url = form.pc_background_url.data
+            settings.pc_background_type = form.pc_background_type.data
+            
+            # 更新移动端背景设置
+            if form.mobile_background_file.data and form.mobile_background_type.data == 'image':
+                mobile_bg_filename = save_image(form.mobile_background_file.data, 'backgrounds')
+                if mobile_bg_filename:
+                    settings.mobile_background_url = url_for('static', filename=f'uploads/backgrounds/{mobile_bg_filename}')
+            elif form.mobile_background_url.data:
+                settings.mobile_background_url = form.mobile_background_url.data
+            settings.mobile_background_type = form.mobile_background_type.data
+            
             # 更新过渡页设置
             settings.enable_transition = form.enable_transition.data
             settings.transition_time = form.transition_time.data
@@ -694,7 +712,17 @@ def site_settings():
             settings.transition_show_description = form.transition_show_description.data
             settings.transition_theme = form.transition_theme.data
             settings.transition_color = form.transition_color.data
-            
+
+            # 更新公告设置
+            settings.announcement_enabled = form.announcement_enabled.data
+            settings.announcement_title = form.announcement_title.data
+            # 直接保存原始HTML内容，不做bleach过滤
+            content = form.announcement_content.data
+            settings.announcement_content = content
+            settings.announcement_start = form.announcement_start.data
+            settings.announcement_end = form.announcement_end.data
+            settings.announcement_remember_days = form.announcement_remember_days.data
+
             # 确认设置值已更新
             current_app.logger.info(f"更新后的设置: enable_transition={settings.enable_transition}, theme={settings.transition_theme}")
             
@@ -1991,14 +2019,26 @@ def apply_background():
     bg_id = data.get('id')
     bg_type = data.get('type')
     bg_url = data.get('url')
+    device_type = data.get('device_type')
     
-    if not all([bg_type, bg_url]):
+    if not all([bg_type, bg_url, device_type]):
         return jsonify({'success': False, 'message': '缺少必要参数'})
     
     try:
         settings = SiteSettings.get_settings()
-        settings.background_type = bg_type
-        settings.background_url = bg_url
+        if device_type == 'pc':
+            settings.pc_background_type = bg_type
+            settings.pc_background_url = bg_url
+        elif device_type == 'mobile':
+            settings.mobile_background_type = bg_type
+            settings.mobile_background_url = bg_url
+        elif device_type == 'both':
+            settings.pc_background_type = bg_type
+            settings.pc_background_url = bg_url
+            settings.mobile_background_type = bg_type
+            settings.mobile_background_url = bg_url
+        else:
+            return jsonify({'success': False, 'message': '未知的设备类型'})
         db.session.commit()
         return jsonify({'success': True})
     except Exception as e:
