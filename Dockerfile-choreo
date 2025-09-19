@@ -40,7 +40,7 @@ COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/*
 
 # 配置Nginx
-COPY docker/nginx.conf /defaults/nginx.conf
+COPY docker/nginx2.conf /defaults/nginx.conf
 
 # 配置Supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -53,13 +53,13 @@ RUN chmod +x /entrypoint.sh /app/docker/cleanup_backups.sh
 # 复制应用代码（放在最后以利用缓存）
 COPY . .
 
-RUN chown -R 10014:10014 /app /data 
+RUN chown -R 10014:10014 /app /data /run/nginx /etc/nginx/http.d /etc/supervisor/conf.d /defaults/nginx.conf /var/log/nginx
 
 # 设置持久化卷
 #VOLUME ["/data", "/app/app/backups", "/app/app/uploads", "/app/app/static", "/etc/nginx/http.d"]
 
 # 暴露端口
-EXPOSE 80
+EXPOSE 8080
 
 RUN apk upgrade sqlite-libs
 
