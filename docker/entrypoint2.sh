@@ -6,9 +6,8 @@ export FLASK_APP=run.py
 export DATABASE_URL="sqlite:////data/app.db"
 export PREFERRED_URL_SCHEME="http"
 
-# 使用 id -un 而不是 whoami，更为可靠
-CURRENT_USER=$(id -un)
-echo "=== 容器启动 (用户: ${CURRENT_USER}) ==="
+# 使用 id -u，它总是能工作，即使 UID 没有对应的用户名
+echo "=== 容器启动 (用户ID: $(id -u)) ==="
 
 # 检查数据库目录
 echo "创建必要目录..."
