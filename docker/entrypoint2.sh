@@ -63,12 +63,24 @@ with app.app_context():
             cursor.execute('PRAGMA table_info(site_settings)')
             columns = [column[1] for column in cursor.fetchall()]
             
+           # 检查是否缺少新列
             missing_columns = []
             if 'enable_transition' not in columns:
                 missing_columns.append(('enable_transition', 'BOOLEAN DEFAULT 0'))
             if 'transition_time' not in columns:
                 missing_columns.append(('transition_time', 'INTEGER DEFAULT 5'))
-            # ... (此处省略了所有列检查，逻辑保持不变)
+            if 'admin_transition_time' not in columns:
+                missing_columns.append(('admin_transition_time', 'INTEGER DEFAULT 3'))
+            if 'transition_ad1' not in columns:
+                missing_columns.append(('transition_ad1', 'TEXT'))
+            if 'transition_ad2' not in columns:
+                missing_columns.append(('transition_ad2', 'TEXT'))
+            if 'transition_remember_choice' not in columns:
+                missing_columns.append(('transition_remember_choice', 'BOOLEAN DEFAULT 1'))
+            if 'transition_show_description' not in columns:
+                missing_columns.append(('transition_show_description', 'BOOLEAN DEFAULT 1'))
+            if 'transition_theme' not in columns:
+                missing_columns.append(('transition_theme', 'VARCHAR(32) DEFAULT "default"'))
             if 'transition_color' not in columns:
                 missing_columns.append(('transition_color', 'VARCHAR(32) DEFAULT "#6e8efb"'))
 
