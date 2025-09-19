@@ -5,11 +5,11 @@ FROM python:3.9-alpine AS builder
 WORKDIR /app
 
 # 切换Alpine镜像源为国内源
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
-    && apk add --no-cache gcc musl-dev libffi-dev
+#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+RUN apk add --no-cache gcc musl-dev libffi-dev
 
 # 配置pip使用国内镜像源
-RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+#RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 复制依赖文件，安装到轮子目录
 COPY requirements.txt .
@@ -25,8 +25,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # 切换Alpine镜像源并安装运行时依赖
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
-    && apk add --no-cache nginx supervisor libffi tzdata \
+#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+RUN apk add --no-cache nginx supervisor libffi tzdata \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
     && mkdir -p /run/nginx /app/app/data /app/app/backups /app/app/uploads /app/app/static /data
