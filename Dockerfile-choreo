@@ -55,7 +55,7 @@ VOLUME ["/data", "/app/app/backups", "/app/app/uploads", "/app/app/static", "/et
 # 暴露端口
 EXPOSE 80
 
-RUN apk upgrade sqlite-libs
+#RUN apk upgrade sqlite-libs
 
 RUN chown -R 10014:10014 /etc/nginx/http.d
 RUN chown -R 10014:10014 /app/app/backups
