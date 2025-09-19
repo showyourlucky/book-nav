@@ -1,5 +1,5 @@
 # 第一阶段：构建依赖
-FROM python:3.9-alpine AS builder
+FROM python:3.11-alpine AS builder
 
 # 设置工作目录
 WORKDIR /app
