@@ -75,6 +75,6 @@ RUN apk upgrade sqlite-libs
 #RUN mkdir -p /data/backups && chown -R 10014:10014 /data/backups
 #RUN mkdir -p /data/uploads && chown -R 10014:10014 /data/uploads
     
-USER appuser
+USER 10014
 # 使用启动脚本作为容器入口点
 ENTRYPOINT ["/entrypoint.sh"] 
