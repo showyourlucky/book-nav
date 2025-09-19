@@ -27,6 +27,10 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# 创建一个系统用户组和用户，指定 GID 和 UID 为 10014
+# -S: 创建系统用户, -G: 指定用户组, -u: 指定 UID
+RUN addgroup -S -g 10014 appgroup && adduser -S -u 10014 -G appgroup appuser
+
 # 切换Alpine镜像源并安装运行时依赖
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
 RUN apk add --no-cache nginx supervisor libffi tzdata \
@@ -53,7 +57,7 @@ RUN chmod +x /entrypoint.sh /app/docker/cleanup_backups.sh
 # 复制应用代码（放在最后以利用缓存）
 COPY . .
 
-RUN chown -R 10014:10014 /app /data /run/nginx /etc/nginx/http.d /etc/supervisor/conf.d /defaults/nginx.conf /var/log/nginx
+RUN chown -R appuser:appgroup /app /data /run/nginx /etc/nginx/http.d /etc/supervisor/conf.d /defaults/nginx.conf /var/log/nginx
 
 # 设置持久化卷
 #VOLUME ["/data", "/app/app/backups", "/app/app/uploads", "/app/app/static", "/etc/nginx/http.d"]
@@ -71,6 +75,6 @@ RUN apk upgrade sqlite-libs
 #RUN mkdir -p /data/backups && chown -R 10014:10014 /data/backups
 #RUN mkdir -p /data/uploads && chown -R 10014:10014 /data/uploads
     
-USER 10014
+USER appuser
 # 使用启动脚本作为容器入口点
 ENTRYPOINT ["/entrypoint.sh"] 
