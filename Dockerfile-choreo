@@ -47,7 +47,7 @@ RUN pip install --no-cache-dir /wheels/*
 COPY docker/nginx2.conf /defaults/nginx.conf
 
 # 配置Supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/supervisord2.conf /etc/supervisor/conf.d/supervisord.conf
 
 # 添加启动脚本并设置执行权限
 COPY docker/entrypoint2.sh /entrypoint.sh
