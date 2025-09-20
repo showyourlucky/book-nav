@@ -1,11 +1,16 @@
-Flask
-Flask-Login
-Flask-SQLAlchemy
-Flask-WTF
-requests
-beautifulsoup4
-lxml
-python-dotenv
-Flask-Migrate
-email-validator
-python-dateutil
+Flask==2.2.5
+Flask-Login==0.6.3
+Flask-SQLAlchemy==2.5.1          # 仍兼容 SQLAlchemy-1.4.x
+Flask-WTF==1.1.1
+itsdangerous==2.1.2
+Jinja2==3.1.2
+SQLAlchemy==1.4.49
+Werkzeug==2.2.3
+requests==2.31.0
+WTForms==3.0.1
+beautifulsoup4==4.12.2
+lxml==4.9.3
+python-dotenv==1.0.0
+Flask-Migrate==4.0.5
+email-validator==2.0.0.post2
+python-dateutil==2.8.2
