@@ -108,8 +108,9 @@ fi
 if [ -f /app/app.db ]; then
     rm /app/app.db
 fi
-ln -sf /data/app.db /app/app.db
-echo "数据库符号链接已创建"
+
+#ln -sf /data/app.db /app/app.db
+#echo "数据库符号链接已创建"
 
 # 检查Nginx配置文件
 # 用户 appuser 有 /etc/nginx/http.d/ 目录的写权限，可以创建文件
