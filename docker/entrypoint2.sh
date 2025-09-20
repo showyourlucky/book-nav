@@ -3,7 +3,7 @@ set -e
 
 # 设置环境变量
 export FLASK_APP=run.py
-export DATABASE_URL="sqlite:////data/app.db"
+export DATABASE_URL="${DATABASE_URL:-sqlite:////data/app.db}"
 export PREFERRED_URL_SCHEME="http"
 
 # 使用 id -u，它总是能工作，即使 UID 没有对应的用户名
@@ -55,7 +55,7 @@ with app.app_context():
         upgrade()
         print("数据库迁移完成")
     except Exception as e:
-        print(f"迁移过程中出现错误: {str(e)}")
+        print(f"迁移过程中出现错误: {str(e)}  --end")
         
         import sqlite3
         try:
